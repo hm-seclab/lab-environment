@@ -1,0 +1,12 @@
+PermitRootLogin yes
+ChallengeResponseAuthentication no
+X11Forwarding yes
+PrintMotd no
+UsePAM yes
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
+Match Group students
+      ForceCommand /usr/local/ssh-jail.sh
+      AllowTcpForwarding no
+      PermitTunnel no
+      X11Forwarding no

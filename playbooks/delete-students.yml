@@ -1,0 +1,12 @@
+- name: Delete student accounts and docker volumes
+  hosts:
+    - all
+  tasks:
+    - name: Delete user
+      user: 
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ students }}"
+    - name: Delete docker volumes
+      shell: docker volume rm "{{ item }}"-lab "{{ item }}"-home "{{ item }}"-etc      
+      loop: "{{ students }}"

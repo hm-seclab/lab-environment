@@ -1,0 +1,9 @@
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted
+
+- name: Restart ssh
+  service:
+    name: ssh
+    state: restarted

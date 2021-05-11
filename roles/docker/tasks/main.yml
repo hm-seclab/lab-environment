@@ -1,0 +1,41 @@
+---
+- name: Update the apt index
+  become: yes
+  apt:
+    update_cache: yes
+    
+
+- name: Install packages for apt add repository
+  become: yes
+  apt:
+    name: "{{ packagesdep }}"
+    state: latest
+  vars:
+    packagesdep:
+    - git
+    - apt-transport-https
+    - ca-certificates
+    - wget
+    - software-properties-common
+    - gnupg2
+    - curl
+
+- name: Add signing key from official repo
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Add official docker repository for Debian
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian buster stable
+    state: present
+
+- name: Index new repo 
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: actually install docker
+  apt:
+    name: "docker-ce"
+    state: latest

@@ -1,0 +1,60 @@
+- name: Update the apt package index
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: Install packages for docker hardening
+  become: yes
+  apt:
+    name: "{{ packagesdep }}"
+    state: latest
+  vars:
+    packagesdep:
+      - uidmap
+
+- name: Ensure groups exist
+  group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "docker"
+    - "students"
+
+# The homedir of a user gets bound to /tmp so we avoid creating a new dir for each student. They won't recognize that because they work inside docker.
+- name: Put students into docker groups
+  user:
+    name: "{{ item }}"
+    groups: docker, students
+    append: false
+    home: /tmp
+    shell: /usr/bin/bash
+    state: present
+  become: yes
+  loop: "{{ students }}"
+
+- name: Configure ssh
+  copy:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+    mode: 0644
+  notify: Restart ssh
+
+- name: Configure docker
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+  notify: Restart docker
+
+- name: Place ssh-jail.sh
+  copy:
+    src: ssh-jail.sh
+    dest: /usr/local/ssh-jail.sh
+    mode: 0755
+
+- name: Copy dockerfile
+  copy:
+    src: Dockerfile
+    dest: /tmp/ssh-jail-dockerfile
+
+- name: Build ssh-jail container
+  shell: docker build -t ssh-jail - < /tmp/ssh-jail-dockerfile

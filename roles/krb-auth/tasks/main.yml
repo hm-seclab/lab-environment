@@ -1,0 +1,36 @@
+
+- name: Update the apt package index
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: Install packages for ldap auth
+  become: yes
+  apt:
+    name: "{{ packagesdep }}"
+    state: latest
+  vars:
+    packagesdep:
+    - sssd
+    - sssd-krb5
+    - sssd-tools
+
+- name: Configure sssd
+  template:
+    src: sssd.conf
+    dest: /etc/sssd/sssd.conf
+    mode: 0600
+    owner: root
+    group: root
+  notify: Restart sssd
+
+- name: Configure nsswitch
+  copy:
+    src: nsswitch.conf
+    dest: /etc/nsswitch.conf
+    mode: 0600
+    owner: root
+    group: root
+
+
+

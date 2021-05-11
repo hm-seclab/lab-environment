@@ -1,0 +1,7 @@
+- name: Jailing students into a docker container without network
+  roles:
+    - docker
+    - krb-auth
+    - ssh-jail
+  hosts:
+    - all
